@@ -2087,3 +2087,4 @@ html[subframe] body {
     } else {
       document.getElementById("main-frame-notchrome").style.display="";
 	}
+}
