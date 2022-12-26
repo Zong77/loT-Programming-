@@ -3,7 +3,7 @@
 
 // 將需要用到的東西命名為簡短的字的區域
 
-#define PIN_BUTTON 7 //改 換連接口 
+#define PIN_BUTTON 2
 #define PIN_AUTOPLAY 1
 #define PIN_READWRITE 10
 #define PIN_CONTRAST 7
@@ -18,37 +18,38 @@
 #define SPRITE_TERRAIN_SOLID_RIGHT 6
 #define SPRITE_TERRAIN_SOLID_LEFT 7
 
-#define HERO_HORIZONTAL_POSITION 1    // 小鳥的水平位置
+#define HERO_HORIZONTAL_POSITION 1    // 恐龍的水平位置
 
 #define TERRAIN_WIDTH 16
 #define TERRAIN_EMPTY 0
 #define TERRAIN_LOWER_BLOCK 1
 #define TERRAIN_UPPER_BLOCK 2
 
-#define HERO_POSITION_OFF 0          // 小鳥消失
+#define HERO_POSITION_OFF 0          // 恐龍消失
 #define HERO_POSITION_RUN_LOWER_1 1  
 #define HERO_POSITION_RUN_LOWER_2 2                       
 
-#define HERO_POSITION_JUMP_1 3       // 小鳥正要開始跳
-#define HERO_POSITION_JUMP_2 4       // 小鳥跳到半空中
-#define HERO_POSITION_JUMP_3 5       // 小鳥跳到最高點(LCD的上排)
-#define HERO_POSITION_JUMP_4 6       // 小鳥跳到最高點(LCD的上排)
-#define HERO_POSITION_JUMP_5 7       // 小鳥跳到最高點(LCD的上排)
-#define HERO_POSITION_JUMP_6 8       // 小鳥跳到最高點(LCD的上排)
-#define HERO_POSITION_JUMP_7 9       // 小鳥跳到半空中
-#define HERO_POSITION_JUMP_8 10      // 小鳥墜落到地板
+#define HERO_POSITION_JUMP_1 3       // 恐龍正要開始跳
+#define HERO_POSITION_JUMP_2 4       // 恐龍跳到半空中
+#define HERO_POSITION_JUMP_3 5       // 恐龍跳到最高點(LCD的上排)
+#define HERO_POSITION_JUMP_4 6       // 恐龍跳到最高點(LCD的上排)
+#define HERO_POSITION_JUMP_5 7       // 恐龍跳到最高點(LCD的上排)
+#define HERO_POSITION_JUMP_6 8       // 恐龍跳到最高點(LCD的上排)
+#define HERO_POSITION_JUMP_7 9       // 恐龍跳到半空中
+#define HERO_POSITION_JUMP_8 10      // 恐龍跳到半空中
 
-#define HERO_POSITION_RUN_UPPER_1 11 // 小鳥在LCD的上排跑 (位置 1)
-#define HERO_POSITION_RUN_UPPER_2 12 // 小鳥在LCD的上排跑 (位置 2)
+#define HERO_POSITION_RUN_UPPER_1 11 // 恐龍在LCD的上排跑 (位置 1)
+#define HERO_POSITION_RUN_UPPER_2 12 // 恐龍在LCD的上排跑 (位置 2)
+
 LiquidCrystal_I2C lcd(0x27,16,2);
 
 static char terrainUpper[TERRAIN_WIDTH + 1];
 static char terrainLower[TERRAIN_WIDTH + 1];
 static bool buttonPushed = false;
 
-void initializeGraphics(){ //小鳥的所有動作的畫面
+void initializeGraphics(){ //恐龍的所有動作的畫面
   static byte graphics[] = {
-    // 小鳥跑時的動作 (位置 1)
+    // 恐龍跑時的動作 (位置 1)
     
     B00000,
     B01110,
@@ -59,7 +60,7 @@ void initializeGraphics(){ //小鳥的所有動作的畫面
     B10010,
     B00000,
 
-    // 小鳥跑時的動作 (位置 2)
+    // 恐龍跑時的動作 (位置 2)
     B00000,
     B01110,
     B01101,
@@ -126,8 +127,7 @@ void initializeGraphics(){ //小鳥的所有動作的畫面
     terrainLower[i] = SPRITE_TERRAIN_EMPTY;
   }
 }
-
-// 地形往左移讓小鳥看起來像是往前移
+// 地形往左移讓恐龍看起來像是往前移
 void advanceTerrain(char* terrain, byte newTerrain){
   for (int i = 0; i < TERRAIN_WIDTH; ++i) {
     char current = terrain[i];
@@ -148,7 +148,7 @@ void advanceTerrain(char* terrain, byte newTerrain){
     }
   }
 }
-// 顯示出小鳥的各種動作
+// 顯示出恐龍的各種動作
 bool drawHero(byte position, char* terrainUpper, char* terrainLower, unsigned int score) {
   bool collide = false;
   char upperSave = terrainUpper[HERO_HORIZONTAL_POSITION];
@@ -236,17 +236,17 @@ void setup(){
   digitalWrite(PIN_BUTTON, HIGH);
   pinMode(PIN_AUTOPLAY, OUTPUT);
   digitalWrite(PIN_AUTOPLAY, HIGH);
-    lcd.init();
+//  lcd.init();
   lcd.backlight();
   
   
- 
-  // 把7號孔改成中斷號4
-  attachInterrupt(4/*PIN_BUTTON*/, buttonPush, FALLING); //改 換連接口
+  
+  // 引腳2映射到中斷號0
+  attachInterrupt(0/*PIN_BUTTON*/, buttonPush, FALLING); //改 換連接口
   
   initializeGraphics();
   
-//`    初始化LCD面板
+  lcd.begin(16, 2);
 }
 
 void loop(){
@@ -256,8 +256,8 @@ void loop(){
   static bool playing = false;
   static bool blink = false;
   static unsigned int distance = 0;
-
-  // 遊戲未開始前一直閃爍 "Press Start" 
+  
+  // 遊戲未開始前一直閃爍 "Press Start"
   if (!playing) {
     drawHero((blink) ? HERO_POSITION_OFF : heroPos, terrainUpper, terrainLower, distance >> 3);
     if (blink) {
@@ -292,13 +292,13 @@ void loop(){
     }
   }
     
-  if (buttonPushed) { // 按下按鈕就小鳥就會跳
+  if (buttonPushed) { // 按下按鈕就恐龍就會跳
     if (heroPos <= HERO_POSITION_RUN_LOWER_2) heroPos = HERO_POSITION_JUMP_1;
     buttonPushed = false;
   }  
 
   if (drawHero(heroPos, terrainUpper, terrainLower, distance >> 3)) {
-    playing = false; // 小鳥撞到東西了，遊戲結束
+    playing = false; // 恐龍撞到東西了，遊戲結束
   } else {
     if (heroPos == HERO_POSITION_RUN_LOWER_2 || heroPos == HERO_POSITION_JUMP_8) {
       heroPos = HERO_POSITION_RUN_LOWER_1;
